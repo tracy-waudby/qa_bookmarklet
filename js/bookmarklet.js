@@ -22,33 +22,6 @@ $(document).ready(function(){
     	}
     }
     waitForJQuery();
-    
-     /**
-     * Make Canvas for highlighting fields
-     **/
-     var canvas = document.createElement('canvas'); 
-     canvas.width = window.innerWidth;
-     canvas.height = window.innerHeight;
-     canvas.style.position='fixed';
-     canvas.style.left=0;
-     canvas.style.top=0;
-     canvas.style.zIndex=9999999998;
-     canvas.style.pointerEvents='none';
-     document.body.appendChild(canvas); 
-     var context = canvas.getContext('2d');
-
-     function drawHighlight(element){
-     	context.strokeStyle = 'yellow';
-     	context.lineWidth = 5;
-     	var elementDomRect = element.getBoundingClientRect();
-     	var x = elementDomRect['left'];
-     	var y = elementDomRect['top'];
-     	var width = elementDomRect['width'];
-     	var height = elementDomRect['height'];
-     	context.strokeRect(x, y, width, height);
-     	context.stroke();
-     	setTimeout(function() { context.clearRect(0, 0, canvas.width, canvas.height); }, 600);
-     }
 
 
      function createDataWidget(){
@@ -56,20 +29,25 @@ $(document).ready(function(){
         * Create window
         **/
         var mydiv = document.createElement('div');
-        mydiv.style = 'color: white; background: #cdd2d8; padding: 14px; border-radius: 3px; line-height: 1.45em; font-size: 14px; font-family: arial; position: fixed; width: 300px;z-index:9999999999;right: 10px; top: 10px;border-radius: 5px; box-shadow: 0 0 10px 0 #888888;text-align: left;';
+        mydiv.style = 'color: white; background: #527a7a; padding: 14px; border-radius: 3px; line-height: 1.45em; font-size: 14px; font-family: arial; position: fixed; width: 300px;z-index:9999999999;right: 10px; top: 10px;border-radius: 5px; box-shadow: 0 0 10px 0 #888888;text-align: left;';
         document.body.appendChild(mydiv);
+        $(mydiv).attr('id', 'myDiv');
 
         var span1 = document.createElement('span');
-        span1.innerHTML = '<b>Select Data:</b> ';
+        span1.innerHTML = '<b>Select data and click input to fill.</b><br> ';
         mydiv.appendChild(span1);
 
         /**
         * Select list data
+        * Strings provided by https://github.com/minimaxir/big-list-of-naughty-strings
         **/
+        
+        var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur accumsan vestibulum neque nullam.";
+
+        //first option needs to be the long string
         var data = [
+        {val : lorem, text: 'Long string'},
         {val : '1;DROP TABLE users', text: 'SQL Injection'},
-        {val : 'ThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaks', text: 'Long string no breaks (525 chars)'},
-        {val : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Collatio igitur ista te nihil iuvat. Si est nihil nisi corpus, summa erunt illa: valitudo, vacuitas doloris, pulchritudo, cetera Lorem ipsum dolor sit amet, consectetur adipiscing elit. Collatio igitur ista te nihil iuvat. Si est nihil nisi corpus, summa erunt illa: valitudo, vacuitas doloris, pulchritudo, cetre', text: 'Long string with breaks (370 chars)'},
         {val : '<b>this is bolded text</b>', text: 'HTML Injection'}, 
         {val : '%uD83D%uDE03', text: 'Emoji'},
         {val : '%3E%3Cscript%3Ealert%28123%29%3C/script%3E', text: 'JS Injection'},
@@ -82,67 +60,54 @@ $(document).ready(function(){
 
         ];
 
-        /**
-        * Create select list
-        **/
+        
         var selection = $('<select>').appendTo(mydiv);
         $(data).each(function() {
         	selection.append($('<option>').attr('value',this.val).text(this.text));
         });
         $(selection).attr('id', 'mySelectList');
-        
-        /**
-        * Help text
-        **/
-        var span2 = document.createElement('span');
-        span2.innerHTML = '<br><b>Click input to fill.</b> ';
-        mydiv.appendChild(span2);
 
-        /**
-        * On click, highlight and set value if element is input type
-        **/
+
+        var $label1 = $("<label for='byte'>").text('Bytes: ');
+        var $label2 = $("<label for='breaks'>").text(' Word Breaks: ');
+
+        $(mydiv).append('<form id="myQAForm90u09u">');
+        $("#myDiv form").append($label1);
+        $("#myDiv form").append('<input type="text" value="100" name="Characters" id="byteSelect" style="width: 50px;"/>');
+        $("#myDiv form").append($label2);
+        $("#myDiv form").append('<input type="checkbox" id="breaks" name="Word breaks" checked />');
+
+
+        $('#byteSelect, #breaks').change(function(){
+            var num = $('#byteSelect').val();
+            var spaces = $('#breaks').prop('checked');
+            var newString = lorem;
+            if (!spaces) {
+                newString = lorem.replace(/[\s,\.]+/g, '');
+            } 
+            while (newString.length < num) {
+                newString = newString + newString;
+            }
+            $('#mySelectList option:first-child').val(newString.substring(0,num));
+
+        });
+
+        $(mySelectList).change(function(event) {
+            if (mySelectList.selectedOptions[0].text == 'Long string') {
+                $('#myQAForm90u09u').show();
+                    var value = mySelectList.value;
+                    event.target.value=unescape(value);
+            } else {
+                $('#myQAForm90u09u').hide();
+            }
+        });
+
         $(document).click(function(event) {
-
-        	if (event.target.tagName == 'INPUT') {
-        		drawHighlight(event.target);
+        	if (event.target.tagName == 'INPUT' && event.target.parentElement.id != 'myQAForm90u09u') {
         		var value = mySelectList.value;
         		event.target.value=unescape(value);
-        		var fieldName = '';
-        		if (event.target.title) {
-        			fieldName = event.target.title;
-        		} else if (event.target.name) {
-        			fieldName = event.target.name;
-        		} else {
-        			fieldName = event.target.className;
-        		}
-        		span2.innerHTML = '<br><b>Selected Element:</b> ' + fieldName;
-        		span2.style = 'color: green';
-
-        	} else {
-        		span2.innerHTML = '<br>Selected element is not an input field';
-        		span2.style = 'color: orange';
         	}
         })
-
-      /**
-      ** Form Validation
-      **/
-      $('#testForm').submit(function (e) {
-      	var pattern = /\W/g; 
-      	var elements = document.getElementById('testForm').elements;
-      	for (var i=0; i< elements.length; i++){
-      		if (elements[i].value) {
-      			if (elements[i].value.length > 30) {
-      				alert(elements[i].name + ' is too long');
-      				e.preventDefault(); 
-      			} 
-      			if (elements[i].value.match(pattern)) {
-      				alert(elements[i].name + ' contains invalid characters');
-      				e.preventDefault(); 
-      			}
-      		}    
-      	}    
-      });
 
   }
 });

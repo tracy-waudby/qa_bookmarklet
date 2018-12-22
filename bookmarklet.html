@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>QA Bookmarklet</title>
+     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bookmarklet.js"></script>
+  </head>
+<body>
+
+<h1>Input Validation Bookmarklet</h1>
+  
+<h3>Tracy Waudby</h3>
+
+
+<p>
+This bookmarklet provides an easy way to fill input fields with a list of naughty strings for data validation.
+<br>
+
+<p><a href="#" id="bookmarklet">QA Data Bookmarklet</a> (Drag me to favorites bar!)<p>
+
+<br>
+<b>How to use:</b>
+<ol>
+<li>Drag and drop into your bookmark bar
+<li>Load the page you are going to test
+<li>Select data from dropdown
+<li>Click the input field to fill
+</ol>
+
+
+<br><br>
+
+
+</body>
+</html>
+
+<script>
+/**
+*  This is the minified and escaped javascript for the bookmarklet, see bookmarklet.js in the "JS" folder for the readable version.
+**/  
+$("#bookmarklet").attr("href", "javascript:(function(){\r\n\r\n    if (window.jQuery === undefined) {\r\n    \tscriptElement=document.createElement(\'script\');\r\n    \tscriptElement.src=\'https:\/\/ajax.googleapis.com\/ajax\/libs\/jquery\/3.3.1\/jquery.min.js\';\r\n    \tdocument.body.appendChild(scriptElement);\r\n    }\r\n\r\n   \r\n    function waitForJQuery() {\r\n    \tif (window.jQuery !== undefined) {\r\n    \t\tcreateDataWidget();\r\n    \t} else {\r\n    \t\tsetTimeout(function() {  waitForJQuery() }, 300);\r\n    \t}\r\n    }\r\n    waitForJQuery();\r\n    \r\n  \r\n     var canvas = document.createElement(\'canvas\'); \r\n     canvas.width = window.innerWidth;\r\n     canvas.height = window.innerHeight;\r\n     canvas.style.position=\'fixed\';\r\n     canvas.style.left=0;\r\n     canvas.style.top=0;\r\n     canvas.style.zIndex=9999999998;\r\n     canvas.style.pointerEvents=\'none\';\r\n     document.body.appendChild(canvas); \r\n     var context = canvas.getContext(\'2d\');\r\n\r\n     function drawHighlight(element){\r\n     \tcontext.strokeStyle = \'yellow\';\r\n     \tcontext.lineWidth = 5;\r\n     \tvar elementDomRect = element.getBoundingClientRect();\r\n     \tvar x = elementDomRect[\'left\'];\r\n     \tvar y = elementDomRect[\'top\'];\r\n     \tvar width = elementDomRect[\'width\'];\r\n     \tvar height = elementDomRect[\'height\'];\r\n     \tcontext.strokeRect(x, y, width, height);\r\n     \tcontext.stroke();\r\n     \tsetTimeout(function() { context.clearRect(0, 0, canvas.width, canvas.height); }, 600);\r\n     }\r\n\r\n\r\n     function createDataWidget(){\r\n    \r\n        var mydiv = document.createElement(\'div\');\r\n        mydiv.style = \'color: white; transition: all 0.1s ease 0s; background: #cdd2d8; padding: 14px; border-radius: 3px; line-height: 1.45em; font-size: 14px; font-family: arial; position: fixed; width: 300px;z-index:9999999999;right: 10px; top: 10px;border-radius: 5px; box-shadow: 0 0 10px 0 #888888;text-align: left;\';\r\n        document.body.appendChild(mydiv);\r\n\r\n        var span1 = document.createElement(\'span\');\r\n        span1.innerHTML = \'<b>Select Data:<\/b> \';\r\n        mydiv.appendChild(span1);\r\n\r\n        var data = [\r\n        {val : \'1;DROP TABLE users\', text: \'SQL Injection\'},\r\n        {val : \'ThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaksThisisareallylongstringwithnobreaks\', text: \'Long string no breaks (525 chars)\'},\r\n        {val : \'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Collatio igitur ista te nihil iuvat. Si est nihil nisi corpus, summa erunt illa: valitudo, vacuitas doloris, pulchritudo, cetera Lorem ipsum dolor sit amet, consectetur adipiscing elit. Collatio igitur ista te nihil iuvat. Si est nihil nisi corpus, summa erunt illa: valitudo, vacuitas doloris, pulchritudo, cetre\', text: \'Long string with breaks (370 chars)\'},\r\n        {val : \'<b>this is bolded text<\/b>\', text: \'HTML Injection\'}, \r\n        {val : \'%uD83D%uDE03\', text: \'Emoji\'},\r\n        {val : \'%3E%3Cscript%3Ealert%28123%29%3C\/script%3E\', text: \'JS Injection\'},\r\n        {val : \'%28%uFF61%u25D5%20%u2200%20%u25D5%uFF61%29\', text: \'Unicode\'},\r\n        {val : \'NULL\', text: \'Null\'},\r\n        {val : \'NaN\', text: \'NaN\'},\r\n        {val : \'999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\', text: \'Huge Number\'},\r\n        {val : \'-9223372036854775808\/-1\', text: \'Negative number\'},\r\n        {val : \'%21@%23%24%25%5E%26*%28%29%60%7E\', text: \'Symbols\'},\r\n\r\n        ];\r\n\r\n        var selection = $(\'<select>\').appendTo(mydiv);\r\n        $(data).each(function() {\r\n        \tselection.append($(\'<option>\').attr(\'value\',this.val).text(this.text));\r\n        });\r\n        $(selection).attr(\'id\', \'mySelectList\');\r\n        \r\n      \r\n        var span2 = document.createElement(\'span\');\r\n        span2.innerHTML = \'<br><b>Click input to fill.<\/b> \';\r\n        mydiv.appendChild(span2);\r\n\r\n      \r\n        $(document).click(function(event) {\r\n\r\n        \tif (event.target.tagName == \'INPUT\') {\r\n        \t\tdrawHighlight(event.target);\r\n        \t\tvar value = mySelectList.value;\r\n        \t\tevent.target.value=unescape(value);\r\n        \t\tvar fieldName = \'\';\r\n        \t\tif (event.target.title) {\r\n        \t\t\tfieldName = event.target.title;\r\n        \t\t} else if (event.target.name) {\r\n        \t\t\tfieldName = event.target.name;\r\n        \t\t} else {\r\n        \t\t\tfieldName = event.target.className;\r\n        \t\t}\r\n        \t\tspan2.innerHTML = \'<br><b>Selected Element:<\/b> \' + fieldName;\r\n        \t\tspan2.style = \'color: green\';\r\n\r\n        \t} else {\r\n        \t\tspan2.innerHTML = \'<br>Selected element is not an input field\';\r\n        \t\tspan2.style = \'color: orange\';\r\n        \t}\r\n        });\r\n      $(\'#testForm\').submit(function (e) {\r\n      \tvar pattern = \/\\W\/g; \r\n      \tvar elements = document.getElementById(\'testForm\').elements;\r\n      \tfor (var i=0; i< elements.length; i++){\r\n      \t\tif (elements[i].value) {\r\n      \t\t\tif (elements[i].value.length > 30) {\r\n      \t\t\t\talert(elements[i].name + \' is too long\');\r\n      \t\t\t\te.preventDefault(); \r\n      \t\t\t} if (elements[i].value.match(pattern)) {\r\n      \t\t\t\talert(elements[i].name + \' contains invalid characters\');\r\n      \t\t\t\te.preventDefault(); \r\n      \t\t\t}\r\n      \t\t}    \r\n      \t}    \r\n      });\r\n\r\n  }\r\n})();");
+
+</script>
